@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <iostream>
 #include <tuple> // For std::tuple
 
 // Define a type alias for RGB tuple
@@ -36,11 +37,11 @@ sf::Image createImageFromRGBVector(const std::vector<std::vector<RGBTuple>>& pix
 int main() {
     // Example usage:
     // Create a sample 2D vector of RGB tuples (10x10 image)
-    std::vector<std::vector<RGBTuple>> pixels(10, std::vector<RGBTuple>(10, {0, 0, 0}));
+    std::vector<std::vector<RGBTuple>> pixels(1000, std::vector<RGBTuple>(1000, {0, 0, 0}));
 
     // Set some example pixel values (e.g., a gradient)
-    for (size_t x = 0; x < 10; ++x) {
-        for (size_t y = 0; y < 10; ++y) {
+    for (size_t x = 0; x < 1000; ++x) {
+        for (size_t y = 0; y < 1000; ++y) {
             uint8_t value = static_cast<uint8_t>(x * 25); // Example gradient
             pixels[x][y] = {value, value, value};
         }
@@ -50,7 +51,7 @@ int main() {
     sf::Image image = createImageFromRGBVector(pixels);
 
     // Save the image to a file (optional)
-    if (image.saveToFile("output_image.png")) {
+    if (image.saveToFile("out/output_image.png")) {
         std::cout << "Image saved successfully!" << std::endl;
     } else {
         std::cerr << "Failed to save image!" << std::endl;
