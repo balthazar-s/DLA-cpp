@@ -12,4 +12,6 @@ compile:
 link:
 	g++ $(BUILD_DIR)/main.o -o $(BUILD_DIR)/main \
 		-Lsrc/lib -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopengl32 -lfreetype \
-		-lwinmm -lgdi32 -mwindows -lsfml-main -static -lstdc++ -static-libgcc -static-libstdc++
+		-lwinmm -lgdi32 -static -lstdc++ -static-libgcc -static-libstdc++
+
+# -mwindows -lsfml-main

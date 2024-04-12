@@ -2,16 +2,16 @@
 #include <vector>
 #include <iostream>
 #include <tuple> // For std::tuple
+#include <cstdlib> // For Random number generation
 
-// Define a type alias for RGB tuple
-using RGBTuple = std::tuple<uint8_t, uint8_t, uint8_t>;
+
+using namespace std;
+
+int width = 250;
+int height = 250;
 
 // Function to create an SFML image from a 2D vector of RGB tuples
-sf::Image createImageFromRGBVector(const std::vector<std::vector<RGBTuple>>& pixels) {
-    // Get dimensions of the input vector
-    size_t width = pixels.size(); // Number of rows
-    size_t height = (width > 0) ? pixels[0].size() : 0; // Number of columns (assuming rectangular structure)
-
+sf::Image createImage(const std::vector<std::vector<bool>>& pixels) {
     // Create SFML image object
     sf::Image image;
 
@@ -22,11 +22,14 @@ sf::Image createImageFromRGBVector(const std::vector<std::vector<RGBTuple>>& pix
         // Iterate over each pixel in the vector
         for (size_t x = 0; x < width; ++x) {
             for (size_t y = 0; y < height; ++y) {
-                // Extract RGB components from the tuple
-                auto [r, g, b] = pixels[x][y];
-
-                // Set the pixel color in the SFML image
-                image.setPixel(x, y, sf::Color(r, g, b));
+                if (pixels[x][y])
+                {
+                    image.setPixel(x, y, sf::Color(255, 255, 255));
+                }
+                else
+                {
+                    image.setPixel(x, y, sf::Color(0, 0, 0));
+                }
             }
         }
     }
@@ -37,24 +40,23 @@ sf::Image createImageFromRGBVector(const std::vector<std::vector<RGBTuple>>& pix
 int main() {
     // Example usage:
     // Create a sample 2D vector of RGB tuples (10x10 image)
-    std::vector<std::vector<RGBTuple>> pixels(1000, std::vector<RGBTuple>(1000, {0, 0, 0}));
+    std::vector<std::vector<bool>> pixels(width, std::vector<bool>(height, false));
 
-    // Set some example pixel values (e.g., a gradient)
-    for (size_t x = 0; x < 1000; ++x) {
-        for (size_t y = 0; y < 1000; ++y) {
-            uint8_t value = static_cast<uint8_t>(x * 25); // Example gradient
-            pixels[x][y] = {value, value, value};
-        }
+    pixels[width/2][height/2] = true;
+
+    for (int i = 0; i < 10000; i++)
+    {
+        pixels[rand()%width][rand()%height] = true;
     }
 
     // Create SFML image from the 2D vector of RGB tuples
-    sf::Image image = createImageFromRGBVector(pixels);
+    sf::Image image = createImage(pixels);
 
     // Save the image to a file (optional)
     if (image.saveToFile("out/output_image.png")) {
-        std::cout << "Image saved successfully!" << std::endl;
+        std::cout << "Image saved successfully!\n";
     } else {
-        std::cerr << "Failed to save image!" << std::endl;
+        std::cerr << "Failed to save image!\n";
     }
 
     return 0;
