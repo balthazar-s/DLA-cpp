@@ -5,57 +5,31 @@
 #include <cstdlib> // For Random number generation
 #include <ctime> // For time
 
-
 using namespace std;
 
-int width = 250;
-int height = 250;
+int WIDTH = 500;
+int HEIGHT = 500;
 
-int total_true = 5000;
+int img_width = 100;
+int img_height = 100;
+
+int total_true = 1000;
 
 vector<int> neighbor_list = {-1, 1};
 
-// Function to create an SFML image from a 2D vector of RGB tuples
-sf::Image createImage(const std::vector<std::vector<bool>>& pixels) 
-{
-    // Create SFML image object
-    sf::Image image;
-
-    if (width > 0 && height > 0) {
-        // Create a new blank image with the specified dimensions
-        image.create(width, height);
-
-        // Iterate over each pixel in the vector
-        for (size_t x = 0; x < width; ++x) {
-            for (size_t y = 0; y < height; ++y) {
-                if (pixels[x][y])
-                {
-                    image.setPixel(x, y, sf::Color(255, 255, 255));
-                }
-                else
-                {
-                    image.setPixel(x, y, sf::Color(0, 0, 0));
-                }
-            }
-        }
-    }
-
-    return image;
-}
-
-bool checkNeighbors(const vector<vector<bool>>& pixels, const vector<int> coords)
+bool checkNeighbors(const sf::Image& image, const vector<int> coords)
 {
     for (int i : neighbor_list) {
         int new_x = coords[0] + i;
         int new_y = coords[1];
 
-        if (new_x >= 0 && new_x < width && pixels[new_x][coords[1]]) {
+        if (new_x >= 0 && new_x < img_width && image.getPixel(new_x, coords[1]) == sf::Color(255, 255, 255)) {
             return true;
         }
 
         new_y = coords[1] + i;
 
-        if (new_y >= 0 && new_y < height && pixels[coords[0]][new_y]) {
+        if (new_y >= 0 && new_y < img_height && image.getPixel(new_x, coords[0]) == sf::Color(255, 255, 255)) {
             return true;
         }
     }
@@ -65,25 +39,37 @@ bool checkNeighbors(const vector<vector<bool>>& pixels, const vector<int> coords
 
 int main() 
 {
+    // Window variables
+    sf::ContextSettings settings;
+    settings.antialiasingLevel = 8; // Adjust the antialiasing level as needed
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Boids", sf::Style::Titlebar | sf::Style::Close, settings);
+    
     // Seed the random number generator with current time
     srand(static_cast<unsigned int>(time(nullptr)));
 
     // Create a sample 2D vector of RGB tuples (10x10 image)
-    std::vector<std::vector<bool>> pixels(width, std::vector<bool>(height, false));
+    sf::Image image;
+    image.create(img_width, img_height);
+
+    // Create Sprite
+    sf::Texture texture;
+    texture.loadFromImage(image);
+    sf::Sprite sprite;
+    sprite.setTexture(texture, true);
+    sprite.setScale(5, 5);
 
     // Initial center pixel
-    pixels[width/2][height/2] = true;
-
+    image.setPixel((img_width/2),(img_height/2), sf::Color(255, 255, 255));
 
     // 2000 random walk pixels
     for (int i = 0; i < total_true; i++)
     {
         // Generate random initial coordinates
-        int x = rand() % width;
-        int y = rand() % height;
+        int x = rand() % img_width;
+        int y = rand() % img_height;
 
         // Check if coordinates are already occupied
-        if (pixels[x][y])
+        if (image.getPixel(x, y) == sf::Color(255, 255, 255))
         {
             i--;
             continue;
@@ -92,7 +78,7 @@ int main()
         // Pixel is next to another condition
         bool friend_pixel = false;
         // Check for original location
-        friend_pixel = checkNeighbors(pixels, {x, y});
+        friend_pixel = checkNeighbors(image, {x, y});
 
         // Random walk of pixel
         while (!friend_pixel) 
@@ -106,7 +92,7 @@ int main()
 
                 // Clamp to bounds of image
                 if (x < 0) x = 0;
-                if (x >= width) x = width - 1;
+                if (x >= img_width) x = img_width - 1;
             }
             else // Y axis random movement by one pixel
             {
@@ -114,27 +100,34 @@ int main()
 
                 // Clamp to bounds of image
                 if (y < 0) y = 0;
-                if (y >= height) y = height - 1;
+                if (y >= img_height) y = img_height - 1;
             }
 
             // Update friend_pixel based on the new coordinates
-            friend_pixel = checkNeighbors(pixels, {x, y});           
+            friend_pixel = checkNeighbors(image, {x, y});           
         }
 
         // When friend_pixel is true, create new "true" value in list, representing a white pixel
-        pixels[x][y] = true;
-        int percentage = (i * 100 / (total_true)) + 1;
-        cout << percentage << "%\n";
+        image.setPixel(x, y, sf::Color(255, 255, 255));
     }
 
-    // Create SFML image from the 2D vector of RGB tuples
-    sf::Image image = createImage(pixels);
+    // Main process
+    while (window.isOpen()) {
+        // Exit window event
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+        
+        // Clear window
+        window.clear();
 
-    // Save the image to a file (optional)
-    if (image.saveToFile("out/output_image.png")) {
-        std::cout << "Image saved successfully!\n";
-    } else {
-        std::cerr << "Failed to save image!\n";
+        //Then, in PlayState::render()
+        window.draw(sprite);
+
+        // Display window
+        window.display();
     }
 
     return 0;
