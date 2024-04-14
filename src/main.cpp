@@ -1,63 +1,38 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <iostream>
-#include <tuple> // For std::tuple
 #include <cstdlib> // For Random number generation
 #include <ctime> // For time
+#include "../include/dla.hpp"
 
 using namespace std;
 
-int WIDTH = 500;
-int HEIGHT = 500;
+int WIDTH = 1000;
+int HEIGHT = 1000;
 
-int img_width = 100;
-int img_height = 100;
+int img_width = 200;
+int img_height = 200;
 
 int total_true = 2000;
-
-vector<int> neighbor_list = {-1, 1};
-
-bool checkNeighbors(const sf::Image& image, const vector<int> coords)
-{
-    for (int i : neighbor_list) {
-        int new_x = coords[0] + i;
-        int new_y = coords[1] + i;
-
-        if (new_x >= 0 && new_x < img_width && image.getPixel(new_x, coords[1]) == sf::Color::White) {
-            return true;
-        }
-
-        if (new_y >= 0 && new_y < img_height && image.getPixel(coords[0], new_y) == sf::Color::White) {
-            return true;
-        }
-    }
-    return false;
-}
 
 int main() 
 {
     // Window variables
     sf::ContextSettings settings;
-    settings.antialiasingLevel = 8; // Adjust the antialiasing level as needed
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "Boids", sf::Style::Titlebar | sf::Style::Close, settings);
+    settings.antialiasingLevel = 8;
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "DLA generation", sf::Style::Titlebar | sf::Style::Close, settings);
     
     // Seed the random number generator with current time
     srand(static_cast<unsigned int>(time(nullptr)));
 
-
-
-    // Create Sprite
-    sf::Texture texture;
-    sf::Sprite sprite;
-    sprite.setScale(5, 5);
+    bool generated = false;
 
     // Main process
     while (window.isOpen()) 
     {   
-        // Create a sample 2D vector of RGB tuples (10x10 image)
-        sf::Image image;
-        image.create(img_width, img_height, sf::Color::Black);
-
+        // Create image
+        DLA_Image image(img_width, img_height);
+        image.init_image();
+        
         // Exit window event
         sf::Event event;
         while (window.pollEvent(event)) 
@@ -66,70 +41,25 @@ int main()
                 window.close();
         }
 
-        // Initial center pixel
-        image.setPixel((img_width/2),(img_height/2), sf::Color::White);
-
-        // Random walk pixels
-        for (int i = 0; i < total_true; i++)
+        if (!generated)
         {
-            // Generate random initial coordinates
-            int x = rand() % img_width;
-            int y = rand() % img_height;
-
-            // Check if coordinates are already occupied
-            if (image.getPixel(x, y) == sf::Color::White)
+            // Random walk pixels
+            for (int i = 0; i < total_true; i++)
             {
-                i--;
-                continue;
+                i += image.rand_walk();
+                
+                // Clear window
+                window.clear();
+
+                // Draw sprite (image) to screen
+                window.draw(image.load_to_sprite());
+
+                // Display window
+                window.display();
             }
 
-            // Pixel is next to another condition
-            bool friend_pixel = false;
-            // Check for original location
-            friend_pixel = checkNeighbors(image, {x, y});
-
-            // Random walk of pixel
-            while (!friend_pixel) 
-            {
-                // Calculate new coordinates based on random movement
-                int x_or_y = rand() % 2;
-
-                if (x_or_y == 0) // X axis random movement by one pixel
-                {
-                    x += (rand() % 2 == 0) ? 1 : -1;
-
-                    // Clamp to bounds of image
-                    if (x < 0) x = 0;
-                    if (x >= img_width) x = img_width - 1;
-                }
-                else // Y axis random movement by one pixel
-                {
-                    y += (rand() % 2 == 0) ? 1 : -1;
-
-                    // Clamp to bounds of image
-                    if (y < 0) y = 0;
-                    if (y >= img_height) y = img_height - 1;
-                }
-
-                // Update friend_pixel based on the new coordinates
-                friend_pixel = checkNeighbors(image, {x, y});           
-            }
-
-            // When friend_pixel is true, create new "true" value in list, representing a white pixel
-            image.setPixel(x, y, sf::Color::White);
-            texture.loadFromImage(image);
-            sprite.setTexture(texture, true);
-            
-            // Clear window
-            window.clear();
-
-            //Then, in PlayState::render()
-            window.draw(sprite);
-
-            // Display window
-            window.display();
+            generated = true;
         }
-
     }
 
     return 0;
