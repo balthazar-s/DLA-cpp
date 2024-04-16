@@ -14,7 +14,7 @@ void DLA_Image::init_image()
     // Initial center pixel
     image.create(img_width, img_height, sf::Color::Black);
     image.setPixel((img_width/2),(img_height/2), sf::Color::White);
-    sprite.setScale({5, 5});
+    sprite.setScale({10, 10});
 }
 
 

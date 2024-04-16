@@ -9,10 +9,10 @@ using namespace std;
 int WIDTH = 1000;
 int HEIGHT = 1000;
 
-int img_width = 200;
-int img_height = 200;
+int img_width = 100;
+int img_height = 100;
 
-int total_true = 2000;
+int total_true = 1000;
 
 int main() 
 {
