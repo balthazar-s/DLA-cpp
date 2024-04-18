@@ -38,7 +38,9 @@ int main()
         while (window.pollEvent(event)) 
         {
             if (event.type == sf::Event::Closed)
+            {
                 window.close();
+            }
         }
 
         if (!generated)
@@ -58,8 +60,10 @@ int main()
                 window.display();
             }
 
+            image.save_image("out/out.jpg");
             generated = true;
         }
+        
     }
 
     return 0;

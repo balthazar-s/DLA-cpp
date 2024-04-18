@@ -26,7 +26,7 @@ sf::Image DLA_Image::get_image() // Returns sf::Image
 
 void DLA_Image::save_image(string file_path) // Saves image as a png at specified file path
 {
-    image.saveToFile(file_path + ".jpg");
+    image.saveToFile(file_path);
 }
 
 
