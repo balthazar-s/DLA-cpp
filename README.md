@@ -6,4 +6,4 @@ Essentially, one pixel is placed in the center of the image, and then the follow
 
 This allows for the generation of clusters which reflect some real world depositing behaviors and which can be used for various different applications, such as random heightmap generation for fairly realistic looking mountains.
 
-<img src="out/out.jpg" width="700" height="700" />
+<img src="out/out.jpg" width="400" height="400" />
